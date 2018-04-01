@@ -18,8 +18,10 @@ fn create(hero: Json<Hero>) -> Json<Hero> {
 #[get("/")]
 fn read() -> Json<Value> {
     Json(json!([
-        "hero 1", 
-        "hero 2"
+        "Natalka", 
+        "Gabrysia",
+        "Kasiusia",
+        "Julasek"
     ]))
 }
 
