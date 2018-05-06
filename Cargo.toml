@@ -1,6 +1,6 @@
 [package]
 name = "hero-api"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Julian Szczurowski <julian.szczurowski@gmail.com>"]
 
 [dependencies]
@@ -9,6 +9,9 @@ rocket_codegen = "0.3.6"
 serde = "1.0"
 serde_json = "1.0"
 serde_derive = "1.0"
+bson = "0.10.0"
+mongodb = "0.3.7"
+lazy_static = "1.0.0"
 
 [dependencies.rocket_contrib]
 version = "*"
