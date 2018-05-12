@@ -69,6 +69,17 @@ fn delete(id: i32) -> Json<Value> {
 }
 
 fn main() {
+    let hero = Hero {
+        id: None,
+        age: 23,
+        hometown: "test".to_string(),
+        name: "julek".to_string(),
+        identity: "unknown".to_string()
+    };
+
+    shaave_the_yak(&hero);
+    shaave_the_yak(&hero);
+
     rocket::ignite()
         .mount("/hero", routes![create, update, delete])
         .mount("/heroes", routes![read])
@@ -83,6 +94,9 @@ fn get_collection() -> Database {
     // db.auth("mongol", "JFXKdHyaMNhluajT").unwrap();
 }
 
+pub fn shaave_the_yak(hero: &Hero) {
+    println!("{}", hero);
+}
 /*let user = "mongol";
     let password = "JFXKdHyaMNhluajT";
     let host = "cluster0-wqqy9.mongodb.net".to_string();
