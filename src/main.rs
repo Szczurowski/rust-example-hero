@@ -13,11 +13,8 @@ extern crate mongodb;
 extern crate lazy_static;
 
 use bson::Bson;
-use mongodb::{Client, ClientOptions, ThreadedClient};
-use mongodb::db::{Database, ThreadedDatabase};
-use mongodb::connstring::{ConnectionString, ConnectionOptions, Host};
-use mongodb::topology::{TopologyDescription, TopologyType};
-use mongodb::stream::{StreamConnector};
+use mongodb::{Client, ThreadedClient};
+use mongodb::db::{ThreadedDatabase};
 
 use rocket_contrib::{Json, Value};
 
@@ -26,22 +23,32 @@ use hero::{Hero};
 
 lazy_static! {
     static ref CLIENT: Client = {
-        let client = Client::connect("cluster0-wqqy9.mongodb.net", 27017).unwrap();
-        client.db("julas-db0").auth("mongol", "JFXKdHyaMNhluajT").unwrap();
-        // client.db("julas-db0");
+        let client = Client::connect("localhost", 27017).unwrap();
+        client.db("julas-db0");
         client
     };
 }
 
+// lazy_static! {
+//     static ref CLIENT: Client = {
+//         let client = Client::connect("cluster0-wqqy9.mongodb.net", 27017).unwrap();
+//         client.db("julas-db0").auth("mongol", "JFXKdHyaMNhluajT").unwrap();
+//         // client.db("julas-db0");
+//         client
+//     };
+// }
+
+// thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: OperationError("No servers available for the provided ReadPreference.")', libcore\result.rs:945:5
+// note: Run with `RUST_BACKTRACE=1` for a backtrace.
+
+
 #[post("/", data = "<hero>")]
 fn create(hero: Json<Hero>) -> Json<Hero> {
-    //let coll = get_db().collection("prescriptions");
     let coll = CLIENT.clone().db("julas-db0").collection("prescriptions");
 
     let doc = doc! { "title" => "Jaws",
                       "array" => [ 1, 2, 3 ] };
 
-    // Insert document into 'test.movies' collection
     coll.insert_one(doc.clone(), None)
         .ok().expect("Failed to insert document.");
 
@@ -50,6 +57,24 @@ fn create(hero: Json<Hero>) -> Json<Hero> {
 
 #[get("/")]
 fn read() -> Json<Value> {
+    let coll = CLIENT.clone().db("julas-db0").collection("prescriptions");
+    let cursor = coll.find(None, None).ok().expect("Failed to read documents.");
+
+    for result in cursor {
+        // let doc = result.expect("Received network error during cursor operations.");
+        // if let Some(&Bson::String(ref value)) = doc.get("spirit_animal") {
+        //     println!("My spirit animal is {}", value);
+        // }
+        if let Ok(item) = result {
+            println!("to_string {:?}", item.get_object_id("_id").unwrap().to_hex());
+
+            match item.get_str("title") {
+                Ok(value) => println!("title {:?}", value),
+                Err(_e) => println!("title doesn't exist"),
+            }
+        }
+    }
+
     Json(json!([
         "Natalka", 
         "Gabrysia",
@@ -69,66 +94,8 @@ fn delete(id: i32) -> Json<Value> {
 }
 
 fn main() {
-    let hero = Hero {
-        id: None,
-        age: 23,
-        hometown: "test".to_string(),
-        name: "julek".to_string(),
-        identity: "unknown".to_string()
-    };
-
-    shaave_the_yak(&hero);
-    shaave_the_yak(&hero);
-
     rocket::ignite()
         .mount("/hero", routes![create, update, delete])
         .mount("/heroes", routes![read])
         .launch();
 }
-
-fn get_collection() -> Database {
-    let client = Client::connect("localhost", 27017)
-       .expect("Failed to initialize standalone client.");    
-    
-    client.db("julas-db0")
-    // db.auth("mongol", "JFXKdHyaMNhluajT").unwrap();
-}
-
-pub fn shaave_the_yak(hero: &Hero) {
-    println!("{}", hero);
-}
-/*let user = "mongol";
-    let password = "JFXKdHyaMNhluajT";
-    let host = "cluster0-wqqy9.mongodb.net".to_string();
-    let db = "julas-db0";
-    let collection = "prescriptions";
-
-    let hosts = vec![Host{
-        host_name: host,
-        ipc: String::new(),
-        port: 27017
-    }];
-
-    let mut client_options = ClientOptions::new();
-    client_options.log_file = Some("/tmp/mongo-commands".to_string());
-
-    let mut description = TopologyDescription::new(StreamConnector::Tcp);
-    description.topology_type = TopologyType::Single;
-
-    let connection_config = ConnectionString{
-        hosts: hosts,
-        string: None,
-        user: Some(user.to_string()),
-        password: Some(password.to_string()),
-        database: None,
-        collection: None,
-        options: None
-    };
-
-    let client = Client::with_config(
-        connection_config,
-        Some(client_options),
-        Some(description)
-    ).ok().expect("Couldn't connect to mongodb database");
-
-    let coll = client.db("julas-db0").collection("prescriptions");*/
