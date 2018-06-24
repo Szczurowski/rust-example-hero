@@ -66,10 +66,10 @@ fn read() -> Json<Value> {
         //     println!("My spirit animal is {}", value);
         // }
         if let Ok(item) = result {
-            println!("to_string {:?}", item.get_object_id("_id").unwrap().to_hex());
+            println!("ID {}", item.get_object_id("_id").unwrap().to_hex());
 
             match item.get_str("title") {
-                Ok(value) => println!("title {:?}", value),
+                Ok(value) => println!("title {}", value),
                 Err(_e) => println!("title doesn't exist"),
             }
         }
