@@ -1,3 +1,4 @@
+#![feature(decl_macro)]
 #![feature(plugin)]
 #![plugin(rocket_codegen)]
 
@@ -16,27 +17,26 @@ use bson::Bson;
 use mongodb::{Client, ThreadedClient};
 use mongodb::db::{ThreadedDatabase};
 
-use rocket_contrib::{Json, Value};
+use rocket_contrib::{Json, JsonValue};
 
 mod hero;
 use hero::{Hero};
 
-lazy_static! {
-    static ref CLIENT: Client = {
-        let client = Client::connect("localhost", 27017).unwrap();
-        client.db("julas-db0");
-        client
-    };
-}
-
 // lazy_static! {
 //     static ref CLIENT: Client = {
-//         let client = Client::connect("cluster0-wqqy9.mongodb.net", 27017).unwrap();
-//         client.db("julas-db0").auth("mongol", "JFXKdHyaMNhluajT").unwrap();
-//         // client.db("julas-db0");
+//         let client = Client::connect("localhost", 27017).unwrap();
+//         client.db("julas-db0");
 //         client
 //     };
 // }
+
+lazy_static! {
+    static ref CLIENT: Client = {
+        let client = Client::connect("cluster0-wqqy9.mongodb.net", 27017).unwrap();
+        client.db("julas-db0").auth("mongol", "JFXKdHyaMNhluajT").unwrap();
+        client
+    };
+}
 
 // thread '<unnamed>' panicked at 'called `Result::unwrap()` on an `Err` value: OperationError("No servers available for the provided ReadPreference.")', libcore\result.rs:945:5
 // note: Run with `RUST_BACKTRACE=1` for a backtrace.
@@ -56,7 +56,7 @@ fn create(hero: Json<Hero>) -> Json<Hero> {
 }
 
 #[get("/")]
-fn read() -> Json<Value> {
+fn read() -> Json<JsonValue> {
     let coll = CLIENT.clone().db("julas-db0").collection("prescriptions");
     let cursor = coll.find(None, None).ok().expect("Failed to read documents.");
 
@@ -89,7 +89,7 @@ fn update(id: i32, hero: Json<Hero>) -> Json<Hero> {
 }
 
 #[delete("/<id>")]
-fn delete(id: i32) -> Json<Value> {
+fn delete(id: i32) -> Json<JsonValue> {
     Json(json!({"status": "ok"}))
 }
 
